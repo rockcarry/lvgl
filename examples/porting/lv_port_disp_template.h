@@ -4,7 +4,7 @@
  */
 
  /*Copy this file as "lv_port_disp.h" and set this value to "1" to enable content*/
-#if 0
+#if 1
 
 #ifndef LV_PORT_DISP_TEMPL_H
 #define LV_PORT_DISP_TEMPL_H
@@ -16,11 +16,15 @@ extern "C" {
 /*********************
  *      INCLUDES
  *********************/
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 
 /*********************
  *      DEFINES
  *********************/
+#define LV_HOR_RES_MAX   640
+#define LV_VER_RES_MAX   480
+#define MY_DISP_HOR_RES  640
+#define MY_DISP_VER_RES  480
 
 /**********************
  *      TYPEDEFS

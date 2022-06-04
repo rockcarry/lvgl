@@ -1,13 +1,5 @@
-/**
- * @file lv_port_fs_templ.h
- *
- */
-
- /*Copy this file as "lv_port_fs.h" and set this value to "1" to enable content*/
-#if 0
-
-#ifndef LV_PORT_FS_TEMPL_H
-#define LV_PORT_FS_TEMPL_H
+#ifndef LV_PORT_DISP_WIN32_H
+#define LV_PORT_DISP_WIN32_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,6 +13,11 @@ extern "C" {
 /*********************
  *      DEFINES
  *********************/
+#define LV_HOR_RES_MAX   1280
+#define LV_VER_RES_MAX   720
+#define MY_DISP_HOR_RES  1280
+#define MY_DISP_VER_RES  720
+#define MY_DISP_ROTATE   0
 
 /**********************
  *      TYPEDEFS
@@ -29,7 +26,8 @@ extern "C" {
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
- void lv_port_fs_init(void);
+void lv_win32_disp_init(void);
+void lv_win32_disp_exit(void);
 
 /**********************
  *      MACROS
@@ -39,6 +37,4 @@ extern "C" {
 } /*extern "C"*/
 #endif
 
-#endif /*LV_PORT_FS_TEMPL_H*/
-
-#endif /*Disable/Enable content*/
+#endif /*LV_PORT_DISP_TEMPL_H*/
