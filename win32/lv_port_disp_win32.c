@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <pthread.h>
 #include "lv_port_disp_win32.h"
 #include "screen.h"
 
@@ -11,7 +10,6 @@ static lv_color_t         s_buf_2[DISP_DRAW_BUF_SIZE];
 static lv_disp_draw_buf_t s_draw_buf_dsc = {};
 static lv_disp_drv_t      s_disp_drv     = {};
 static BMP               *s_disp_bmp     = &WINDOW;
-static pthread_t          s_lv_thread    = (pthread_t)NULL;
 
 static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
 {
@@ -31,19 +29,6 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_
     lv_disp_flush_ready(disp_drv);
 }
 
-static void* lv_thread_proc(void *param)
-{
-    uint32_t tick_last = get_tick_count(), tick_cur;
-    while (s_disp_bmp->created) {
-        usleep(10 * 1000);
-        tick_cur  = get_tick_count();
-        lv_tick_inc((int32_t)tick_cur - (int32_t)tick_last);
-        tick_last = tick_cur;
-        lv_timer_handler();
-    }
-    return NULL;
-}
-
 void lv_win32_disp_init(void)
 {
     lv_disp_draw_buf_init(&s_draw_buf_dsc, s_buf_1, s_buf_2, DISP_DRAW_BUF_SIZE);
@@ -58,16 +43,21 @@ void lv_win32_disp_init(void)
     lv_disp_t *disp = lv_disp_drv_register(&s_disp_drv);
     lv_disp_set_rotation(disp, MY_DISP_ROTATE);
 
+    // create screen/window bitmap
     bitmap_create(s_disp_bmp, MY_DISP_HOR_RES, MY_DISP_VER_RES);
-    pthread_create(&s_lv_thread, NULL, lv_thread_proc, s_disp_bmp);
 }
 
 void lv_win32_disp_exit(void)
 {
-    bitmap_destroy(s_disp_bmp, 0);
-    if (s_lv_thread) {
-        pthread_join(s_lv_thread, NULL);
-        s_lv_thread = (pthread_t)NULL;
+    uint32_t tick_last = get_tick_count(), tick_cur;
+    while (!s_disp_bmp->closed) {
+        tick_cur  = get_tick_count();
+        lv_tick_inc((int32_t)tick_cur - (int32_t)tick_last);
+        tick_last = tick_cur;
+        lv_timer_handler();
+        usleep(10 * 1000);
     }
-}
 
+    // destory screen/window bitmap
+    bitmap_destroy(s_disp_bmp, 0);
+}

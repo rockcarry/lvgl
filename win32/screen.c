@@ -230,8 +230,7 @@ static void _ddraw_bmp_destroy(void *pb, int flags)
 {
     if (flags) PostMessage(g_ffrge_hwnd, WM_CLOSE, 0, 0);
     if (s_ddraw_thread) { pthread_join(s_ddraw_thread, NULL); s_ddraw_thread = (pthread_t)NULL; }
-    ((BMP*)pb)->created = 0;
-    g_ffrge_hwnd        = NULL;
+    g_ffrge_hwnd = NULL;
 }
 
 static void _ddraw_bmp_lock(void *pb, int x1, int y1, int x2, int y2)
@@ -269,6 +268,7 @@ static LRESULT CALLBACK RGE_DDRAW_WNDPROC(HWND hwnd, UINT uMsg, WPARAM wParam, L
         }
         break;
     case WM_DESTROY:
+        SCREEN.closed = 1;
         PostQuitMessage(0);
         return 0;
     }
@@ -364,9 +364,8 @@ static void _gdi_bmp_destroy(void *pb, int flags)
     if (s_gdi_thread) { pthread_join(s_gdi_thread, NULL); s_gdi_thread = (pthread_t)NULL; }
     if (s_gdi_hdc   ) { DeleteDC     (s_gdi_hdc ); s_gdi_hdc  = NULL; }
     if (s_gdi_hbmp  ) { DeleteObject (s_gdi_hbmp); s_gdi_hbmp = NULL; }
-    ((BMP*)pb)->created = 0;
-    ((BMP*)pb)->pdata   = NULL;
-    g_ffrge_hwnd        = NULL;
+    ((BMP*)pb)->pdata = NULL;
+    g_ffrge_hwnd      = NULL;
 }
 
 static void _gdi_bmp_lock(void *pb, int x1, int y1, int x2, int y2)
@@ -407,6 +406,7 @@ static LRESULT CALLBACK RGE_GDI_WNDPROC(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
         EndPaint(hwnd, &ps);
         return 0;
     case WM_DESTROY:
+        WINDOW.closed = 1;
         PostQuitMessage(0);
         return 0;
     default:
@@ -418,18 +418,18 @@ static LRESULT CALLBACK RGE_GDI_WNDPROC(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
 #define DEF_BITMAP_HEIGHT  480
 void bitmap_create(BMP *pb, int w, int h)
 {
-    if (!pb || pb->created) return;
+    if (!pb) return;
     pb->width  = w ? w : DEF_BITMAP_WIDTH;
     pb->height = h ? h : DEF_BITMAP_HEIGHT;
     pb->stride = pb->width * sizeof(uint32_t);
+    pb->closed = 0;
     if (pb->create) pb->create(pb);
     else pb->pdata = calloc(1, pb->stride * pb->height);
-    pb->created = 1;
 }
 
 void bitmap_destroy(BMP *pb, int flags)
 {
-    if (!pb || !pb->created) return;
+    if (!pb) return;
     if (pb->destroy) pb->destroy(pb, flags);
     free(pb->pdata); pb->pdata = NULL;
 }

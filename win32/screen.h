@@ -14,7 +14,7 @@ typedef struct {
     void (*destroy)(void *pb, int flags);
     void (*lock   )(void *pb, int x1, int y1, int x2, int y2);
     void (*unlock )(void *pb);
-    int    created;
+    int    closed;
     int    reserved[4];
 } BMP;
 
