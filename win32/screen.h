@@ -22,6 +22,7 @@ void bitmap_create (BMP *pb, int w, int h);
 void bitmap_destroy(BMP *pb, int flags);
 void bitmap_lock   (BMP *pb, int x1, int y1, int x2, int y2);
 void bitmap_unlock (BMP *pb);
+void bitmap_show   (BMP *pb);
 
 unsigned get_tick_count(void);
 

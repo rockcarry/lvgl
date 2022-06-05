@@ -50,11 +50,13 @@ void lv_win32_disp_init(void)
 void lv_win32_disp_exit(void)
 {
     uint32_t tick_last = get_tick_count(), tick_cur;
+    int      show      = 0;
     while (!s_disp_bmp->closed) {
         tick_cur  = get_tick_count();
         lv_tick_inc((int32_t)tick_cur - (int32_t)tick_last);
         tick_last = tick_cur;
         lv_timer_handler();
+        if (!show) { bitmap_show(s_disp_bmp); show = 1; }
         usleep(10 * 1000);
     }
 
