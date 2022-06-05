@@ -317,7 +317,7 @@ static void* _gdi_bmp_thread_proc(void *param)
     y = y > 0 ? y : 0;
 
     MoveWindow  (g_ffrge_hwnd, x, y, w, h, FALSE);
-//  ShowWindow  (g_ffrge_hwnd, SW_SHOW);
+    ShowWindow  (g_ffrge_hwnd, SW_SHOW);
     UpdateWindow(g_ffrge_hwnd);
 
     while (GetMessage(&msg, NULL, 0, 0)) {
@@ -436,7 +436,6 @@ void bitmap_destroy(BMP *pb, int flags)
 
 void bitmap_lock  (BMP *pb, int x1, int y1, int x2, int y2) { if (pb && pb->lock) pb->lock(pb, x1, y1, x2, y2); }
 void bitmap_unlock(BMP *pb) { if (pb && pb->unlock) pb->unlock(pb); }
-void bitmap_show  (BMP *pb) { if (g_ffrge_hwnd) ShowWindow(g_ffrge_hwnd, SW_SHOW); }
 
 unsigned get_tick_count(void) { return GetTickCount(); }
 

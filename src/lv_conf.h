@@ -36,7 +36,7 @@
 
 /* Adjust color mix functions rounding. GPUs might calculate color mix (blending) differently.
  * 0: round down, 64: round up from x.75, 128: round up from half, 192: round up from x.25, 254: round up */
-#define LV_COLOR_MIX_ROUND_OFS 0
+#define LV_COLOR_MIX_ROUND_OFS (LV_COLOR_DEPTH == 32 ? 0: 128)
 
 /*Images pixels with this color will not be drawn if they are chroma keyed)*/
 #define LV_COLOR_CHROMA_KEY lv_color_hex(0x00ff00)         /*pure green*/
@@ -93,7 +93,7 @@
 
 /*Default Dot Per Inch. Used to initialize default sizes such as widgets sized, style paddings.
  *(Not so important, you can adjust it to modify default sizes and spaces)*/
-#define LV_DPI_DEF 128     /*[px/inch]*/
+#define LV_DPI_DEF 130     /*[px/inch]*/
 
 /*=======================
  * FEATURE CONFIGURATION
@@ -120,24 +120,6 @@
     #define LV_CIRCLE_CACHE_SIZE 4
 #endif /*LV_DRAW_COMPLEX*/
 
-/**
- * "Simple layers" are used when a widget has `style_opa < 255` to buffer the widget into a layer
- * and blend it as an image with the given opacity.
- * Note that `bg_opa`, `text_opa` etc don't require buffering into layer)
- * The widget can be buffered in smaller chunks to avoid using large buffers.
- * `draw_area` (`lv_area_t` meaning the area to draw and `px_size` (size of a pixel in bytes)
- * can be used the set the buffer size adaptively.
- *
- * - LV_LAYER_SIMPLE_BUF_SIZE: [bytes] the optimal target buffer size. LVGL will try to allocate it
- * - LV_LAYER_SIMPLE_FALLBACK_BUF_SIZE: [bytes]  used if `LV_LAYER_SIMPLE_BUF_SIZE` couldn't be allocated.
- *
- * Both buffer sizes are in bytes.
- * "Transformed layers" (where transform_angle/zoom properties are used) use larger buffers
- * and can't be drawn in chunks. So these settings affects only widgets with opacity.
- */
-#define LV_LAYER_SIMPLE_BUF_SIZE          (24 * 1024)
-#define LV_LAYER_SIMPLE_FALLBACK_BUF_SIZE LV_MAX(lv_area_get_width(&draw_area) * px_size, 2048)
-
 /*Default image cache size. Image caching keeps the images opened.
  *If only the built-in image formats are used there is no real advantage of caching. (I.e. if no new image decoder is added)
  *With complex image decoders (e.g. PNG or JPG) caching can save the continuous open/decode of images.
@@ -154,7 +136,7 @@
  *LV_GRAD_CACHE_DEF_SIZE sets the size of this cache in bytes.
  *If the cache is too small the map will be allocated only while it's required for the drawing.
  *0 mean no caching.*/
-#define LV_GRAD_CACHE_DEF_SIZE (64 * 1024)
+#define LV_GRAD_CACHE_DEF_SIZE (16 * 1024)
 
 /*Allow dithering the gradients (to achieve visual smooth color gradients on limited color depth display)
  *LV_DITHER_GRADIENT implies allocating one or two more lines of the object's rendering surface
@@ -169,14 +151,11 @@
 
 /*Maximum buffer size to allocate for rotation.
  *Only used if software rotation is enabled in the display driver.*/
-#define LV_DISP_ROT_MAX_BUF (64*1024)
+#define LV_DISP_ROT_MAX_BUF (16*1024)
 
 /*-------------
  * GPU
  *-----------*/
-
-/*Use Arm's 2D acceleration library Arm-2D */
-#define LV_USE_GPU_ARM2D 0
 
 /*Use STM32's DMA2D (aka Chrom Art) GPU*/
 #define LV_USE_GPU_STM32_DMA2D 0
@@ -184,12 +163,6 @@
     /*Must be defined to include path of CMSIS header of target processor
     e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
     #define LV_GPU_DMA2D_CMSIS_INCLUDE
-#endif
-
-/*Use SWM341's DMA2D GPU*/
-#define LV_USE_GPU_SWM341_DMA2D 0
-#if LV_USE_GPU_SWM341_DMA2D
-    #define LV_GPU_SWM341_DMA2D_INCLUDE "SWM341.h"
 #endif
 
 /*Use NXP's PXP GPU iMX RTxxx platforms*/
@@ -235,7 +208,7 @@
 
     /*1: Print the log with 'printf';
     *0: User need to register a callback with `lv_log_register_print_cb()`*/
-    #define LV_LOG_PRINTF 0
+    #define LV_LOG_PRINTF 1
 
     /*Enable/disable LV_LOG_TRACE in modules that produces a huge number of logs*/
     #define LV_LOG_TRACE_MEM        1
@@ -461,6 +434,8 @@
 
 #define LV_USE_ARC        1
 
+#define LV_USE_ANIMIMG    1
+
 #define LV_USE_BAR        1
 
 #define LV_USE_BTN        1
@@ -506,8 +481,6 @@
 /*-----------
  * Widgets
  *----------*/
-#define LV_USE_ANIMIMG    1
-
 #define LV_USE_CALENDAR   1
 #if LV_USE_CALENDAR
     #define LV_CALENDAR_WEEK_STARTS_MONDAY 0
@@ -540,12 +513,6 @@
 
 #define LV_USE_MSGBOX     1
 
-#define LV_USE_SPAN       1
-#if LV_USE_SPAN
-    /*A line text can contain maximum num of span descriptor */
-    #define LV_SPAN_SNIPPET_STACK_SIZE 64
-#endif
-
 #define LV_USE_SPINBOX    1
 
 #define LV_USE_SPINNER    1
@@ -555,6 +522,12 @@
 #define LV_USE_TILEVIEW   1
 
 #define LV_USE_WIN        1
+
+#define LV_USE_SPAN       1
+#if LV_USE_SPAN
+    /*A line text can contain maximum num of span descriptor */
+    #define LV_SPAN_SNIPPET_STACK_SIZE 64
+#endif
 
 /*-----------
  * Themes
@@ -665,10 +638,10 @@
 
 /*FFmpeg library for image decoding and playing videos
  *Supports all major image formats so do not enable other image decoder with it*/
-#define LV_USE_FFMPEG 0
+#define LV_USE_FFMPEG  0
 #if LV_USE_FFMPEG
     /*Dump input information to stderr*/
-    #define LV_FFMPEG_DUMP_FORMAT 0
+    #define LV_FFMPEG_AV_DUMP_FORMAT 0
 #endif
 
 /*-----------
@@ -679,19 +652,10 @@
 #define LV_USE_SNAPSHOT 0
 
 /*1: Enable Monkey test*/
-#define LV_USE_MONKEY 0
+#define LV_USE_MONKEY   0
 
 /*1: Enable grid navigation*/
-#define LV_USE_GRIDNAV 1
-
-/*1: Enable lv_obj fragment*/
-#define LV_USE_FRAGMENT 1
-
-/*1: Support using images as font in label or span widgets */
-#define LV_USE_IMGFONT 0
-
-/*1: Enable a published subscriber based messaging system */
-#define LV_USE_MSG 1
+#define LV_USE_GRIDNAV  0
 
 /*==================
 * EXAMPLES
