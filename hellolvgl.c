@@ -5,6 +5,12 @@
 extern void lv_platform_init(void);
 extern void lv_platform_exit(void);
 
+extern void lv_demo_widgets(void);
+extern void lv_demo_benchmark(void);
+extern void lv_demo_stress(void);
+extern void lv_demo_music(void);
+
+#if 0
 static void btn_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -30,13 +36,14 @@ static void lv_hello_world(void)
     lv_label_set_text(label, "Hello World");        /*Set the labels text*/
     lv_obj_center(label);  
 }
+#endif
 
 int main(void)
 {
     lv_init();
     lv_platform_init();
 
-    lv_hello_world();
+    lv_demo_widgets();
     
     lv_platform_exit();
     return 0;

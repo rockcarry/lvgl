@@ -37,10 +37,11 @@ clean|distclean)
 esac
 
 CFLAGS="-Wall -I$LVGL_INCLUDE_DIR"
-LDFLAGS="-L$LVGL_LIB_DIR -llvgl"
+LDFLAGS="--static -L$LVGL_BUILD_DIR -llvgl_examples -llvgl_demos -L$LVGL_LIB_DIR -llvgl"
 
 case "$LVGL_PORT_PLATFORM" in
 "win32")
+    CFLAGS="$CFLAGS -mwindows"
     LDFLAGS="$LDFLAGS -lgdi32"
     ;;
 *)
